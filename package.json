@@ -1,0 +1,23 @@
+{
+  "name": "server-training",
+  "version": "1.0.0",
+  "description": "\"# ServerTraining\"",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lorenpap/ServerTraining.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lorenpap/ServerTraining/issues"
+  },
+  "homepage": "https://github.com/lorenpap/ServerTraining#readme",
+  "dependencies": {
+    "node": "^15.4.0"
+  }
+}
