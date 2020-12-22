@@ -9,11 +9,12 @@ const contentOptions: ListenOptions = {
     path: '/CONTENT',
     port: 3000
 }
-
+let fileContent: string = '';
+content()
 const server = http.createServer((req: IncomingMessage, res: ServerResponse) => {
     res.statusCode = 200
     res.setHeader('Content-Type', 'text/plain')
-    res.end(req.url === '/CONTENT' ? content() : req.url === '/updateTime' ? updateTime() : null)
+    res.end(req.url === '/CONTENT' ? fileContent.toUpperCase() : req.url === '/updateTime' ? updateTime() : null)
 })
 
 server.listen(contentOptions, () => {
@@ -21,12 +22,12 @@ server.listen(contentOptions, () => {
 })
 
 function content() {
-    try {
-        const data = fs.readFileSync(filePath, 'utf8');
-        return (data.toUpperCase());
-    } catch (e) {
-        console.log('Error:', e.stack);
-    }
+    fileContent = ''
+    const data = fs.createReadStream(filePath, 'utf8');
+    data.on('data', (chunk: string) => {
+        fileContent += chunk
+    })
+    data.on('error', (err: Error) => console.log(err))
 }
 
 function updateTime() {
