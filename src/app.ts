@@ -24,14 +24,21 @@ function dataByUrl(req: IncomingMessage, res: ServerResponse) {
         content(res);
     }
     if (req.url === '/updateTime') {
-        updateTime(res);
+        updateTime().then(data => {
+            res.statusCode = 200;
+            res.write(data);
+            res.end();
+        }).catch(err => {
+            res.statusCode = 404;
+            res.statusMessage = err.message;
+        });
     }
 }
 
 function content(res: ServerResponse) {
     const data = fs.createReadStream(filePath, 'utf8');
     data.on('data', (chunk: string) => {
-        res.write(chunk);
+        res.write(chunk.toUpperCase());
     });
     data.on('end', () => {
         res.statusCode = 200;
@@ -44,14 +51,14 @@ function content(res: ServerResponse) {
     );
 }
 
-function updateTime(res: ServerResponse) {
-    fs.stat(filePath, (err, stats) => {
-        if (err) {
-            res.statusCode = 404;
-            res.statusMessage = err.message;
-        }
-        res.statusCode = 200;
-        res.write(stats.mtime.toString());
-        res.end();
-    });
+function updateTime() {
+    return new Promise((resolve, reject) => {
+        fs.stat(filePath, (err, stats) => {
+            if (err) {
+                reject(err);
+                return;
+            }
+            resolve(stats.mtime.toString());
+        });
+    })
 }
