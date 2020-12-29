@@ -1,35 +1,57 @@
-import {IncomingMessage, ServerResponse} from "http";
+import * as http from "http";
+import {IncomingMessage, Server, ServerResponse} from "http";
 import {ListenOptions} from "net";
+import * as fs from "fs";
 
-const http = require('http')
-const fs = require('fs')
-const filePath: string = './text/exampleFile.txt'
+const filePath: string = './text/exampleFile.txt';
 const contentOptions: ListenOptions = {
     host: 'localhost',
-    path: '/CONTENT',
     port: 3000
-}
-let fileContent: string = '';
-content()
-const server = http.createServer((req: IncomingMessage, res: ServerResponse) => {
-    res.statusCode = 200
-    res.setHeader('Content-Type', 'text/plain')
-    res.end(req.url === '/CONTENT' ? fileContent.toUpperCase() : req.url === '/updateTime' ? updateTime() : null)
-})
+};
+
+const server: Server = http.createServer((req: IncomingMessage, res: ServerResponse) => {
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'text/plain');
+    dataByUrl(req, res);
+});
 
 server.listen(contentOptions, () => {
-    console.log(`Server running at http://${contentOptions.host}:${contentOptions.port}/`)
-})
+    console.log(`Server running at http://${contentOptions.host}:${contentOptions.port}/`);
+});
 
-function content() {
-    fileContent = ''
-    const data = fs.createReadStream(filePath, 'utf8');
-    data.on('data', (chunk: string) => {
-        fileContent += chunk
-    })
-    data.on('error', (err: Error) => console.log(err))
+function dataByUrl(req: IncomingMessage, res: ServerResponse) {
+    if (req.url === '/CONTENT') {
+        content(res);
+    }
+    if (req.url === '/updateTime') {
+        updateTime(res);
+    }
 }
 
-function updateTime() {
-    return fs.statSync(filePath).mtime.toString()
+function content(res: ServerResponse) {
+    const data = fs.createReadStream(filePath, 'utf8');
+    data.on('data', (chunk: string) => {
+        res.write(chunk);
+    });
+    data.on('end', () => {
+        res.statusCode = 200;
+        res.end();
+    });
+    data.on('error', (err: Error) => {
+            res.statusCode = 404;
+            res.statusMessage = err.message;
+        }
+    );
+}
+
+function updateTime(res: ServerResponse) {
+    fs.stat(filePath, (err, stats) => {
+        if (err) {
+            res.statusCode = 404;
+            res.statusMessage = err.message;
+        }
+        res.statusCode = 200;
+        res.write(stats.mtime.toString());
+        res.end();
+    });
 }
