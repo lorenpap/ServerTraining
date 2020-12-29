@@ -32,6 +32,9 @@ function dataByUrl(req: IncomingMessage, res: ServerResponse) {
             res.statusCode = 404;
             res.statusMessage = err.message;
         });
+    } else {
+        res.statusCode = 400;
+        res.end();
     }
 }
 
