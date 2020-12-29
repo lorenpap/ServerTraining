@@ -23,7 +23,7 @@ function dataByUrl(req: IncomingMessage, res: ServerResponse) {
     if (req.url === '/CONTENT') {
         content(res);
     }
-    if (req.url === '/updateTime') {
+    else if (req.url === '/updateTime') {
         updateTime().then(data => {
             res.statusCode = 200;
             res.write(data);
