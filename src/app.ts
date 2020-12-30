@@ -2,6 +2,7 @@ import * as http from "http";
 import {IncomingMessage, Server, ServerResponse} from "http";
 import {ListenOptions} from "net";
 import * as fs from "fs";
+import {ReadStream} from "fs";
 
 const filePath: string = './text/exampleFile.txt';
 const contentOptions: ListenOptions = {
@@ -19,17 +20,16 @@ server.listen(contentOptions, () => {
     console.log(`Server running at http://${contentOptions.host}:${contentOptions.port}/`);
 });
 
-function dataByUrl(req: IncomingMessage, res: ServerResponse) {
+const dataByUrl = (req: IncomingMessage, res: ServerResponse) => {
     if (req.url === '/CONTENT') {
         content(res);
-    }
-    else if (req.url === '/updateTime') {
+    } else if (req.url === '/updateTime') {
         updateTime().then(data => {
             res.statusCode = 200;
             res.write(data);
             res.end();
         }).catch(err => {
-            res.statusCode = 404;
+            res.statusCode = 500;
             res.statusMessage = err.message;
         });
     } else {
@@ -38,8 +38,8 @@ function dataByUrl(req: IncomingMessage, res: ServerResponse) {
     }
 }
 
-function content(res: ServerResponse) {
-    const data = fs.createReadStream(filePath, 'utf8');
+const content = (res: ServerResponse) => {
+    const data: ReadStream = fs.createReadStream(filePath, 'utf8');
     data.on('data', (chunk: string) => {
         res.write(chunk.toUpperCase());
     });
@@ -54,7 +54,7 @@ function content(res: ServerResponse) {
     );
 }
 
-function updateTime() {
+const updateTime = () => {
     return new Promise((resolve, reject) => {
         fs.stat(filePath, (err, stats) => {
             if (err) {
